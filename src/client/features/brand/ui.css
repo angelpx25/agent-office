@@ -1,0 +1,38 @@
+/* The corporate theme's windows and HUD (see features/brand/): the company's navy and blue in place of
+   the office's ink and orange, a plain sans in place of the rounded one, and hairline borders with soft
+   shadows in place of the cartoon outlines. It's on while <html data-theme="corporate">. The selectors
+   start with that, so they beat base.css's whichever order the sheets load in. */
+
+:root[data-theme='corporate'] {
+  --ink: #1b2a41;
+  --paper: #ffffff;
+  --paper-2: #f1f4f9;
+  --accent: #1f6feb;
+  --muted: #5b6b80;
+  --good: #12a37f;
+  --info: #22c3e6;
+  --shadow: 0 6px 18px rgba(15, 30, 60, 0.16);
+  --radius: 10px;
+  --font: 'Segoe UI', Inter, system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+}
+
+:root[data-theme='corporate'] :is(.panel, .btn, .modal, .toast, .conn, .svc-list li, .swatch, .modal textarea, .modal input[type='text'], .modal input[type='password']) {
+  border-width: 1px;
+  border-color: #c9d2de;
+}
+:root[data-theme='corporate'] :is(.modal header, .modal footer) { border-width: 1px; border-color: #dfe5ee; }
+:root[data-theme='corporate'] .modal { border-radius: 12px; box-shadow: 0 24px 60px rgba(15, 30, 60, 0.35); }
+:root[data-theme='corporate'] .modal header { background: var(--ink); color: #fff; }
+:root[data-theme='corporate'] .modal header .btn { color: var(--ink); }
+:root[data-theme='corporate'] :is(.btn, .svc-list li) { border-radius: 8px; box-shadow: 0 1px 2px rgba(15, 30, 60, 0.12); font-weight: 600; }
+:root[data-theme='corporate'] .btn:active { box-shadow: none; }
+:root[data-theme='corporate'] .btn:hover { background: var(--paper-2); }
+:root[data-theme='corporate'] .btn.primary,
+:root[data-theme='corporate'] .btn.on { border-color: transparent; }
+:root[data-theme='corporate'] .btn.primary:hover { background: #1a5fd0; }
+:root[data-theme='corporate'] .btn.on:hover { background: #0f8c6c; }
+:root[data-theme='corporate'] .modal :is(textarea, input[type='text'], input[type='password']):focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.18); }
+:root[data-theme='corporate'] .backdrop { background: rgba(11, 37, 69, 0.45); }
+:root[data-theme='corporate'] .settings-nav { border-width: 1px; border-color: #dfe5ee; }
+:root[data-theme='corporate'] .settings-tab.on { border: 1px solid #c9d2de; border-left: 3px solid var(--accent); box-shadow: 0 1px 2px rgba(15, 30, 60, 0.12); }
+:root[data-theme='corporate'] .setting { border-width: 1px; border-color: #dfe5ee; border-radius: 10px; }

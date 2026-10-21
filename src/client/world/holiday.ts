@@ -476,12 +476,12 @@ export class Holiday {
   /** Bats far off round the moon, which ride along with you like the moon does. */
   private moonBats = new THREE.Group();
   private lights: THREE.MeshToonMaterial[];
-  private colliders: Record<Theme, Collider[]> = { halloween: [], christmas: [] };
+  private colliders: Record<Theme, Collider[]> = { halloween: [], christmas: [], corporate: [] }; // corporate's things are features/brand's
   /**
    * Each holiday's things down on the street (and on the landing outside the bottom floor's exit),
    * how far down the street is from the floor you're on, and where their colliders are from the bottom floor.
    */
-  private street: Record<Theme, THREE.Group> = { halloween: new THREE.Group(), christmas: new THREE.Group() };
+  private street: Record<Theme, THREE.Group> = { halloween: new THREE.Group(), christmas: new THREE.Group(), corporate: new THREE.Group() };
   private drop = 0;
   private base = new Map<Collider, { top: number; bottom: number }>();
   /** The plants' leaves, and the tree each becomes at Christmas. */

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { Theme } from '../../../shared/protocol';
 import { GRIME, beardColor, elfBoot, elfHat, elfWorker, zombieWorker, type Beard, type PeasantGarb } from '../costumes';
+import { workerSuit } from '../suits';
 import type { WorkerRig } from './rig';
 
 // Dressing a worker up: for a holiday, and for how worn out it's getting.
@@ -9,7 +10,8 @@ import type { WorkerRig } from './rig';
 const ZOMBIE = new THREE.Color('#7fa36b');
 
 /**
- * Dresses a worker up for a holiday (a zombie for Halloween, an elf for Christmas), or in just its own
+ * Dresses a worker up for the theme (a zombie for Halloween, an elf for Christmas, a suit and tie for
+ * the corporate look), or in just its own
  * skin, `color` (null). What it puts on goes in `outfit`, for taking off again.
  */
 export function dressUp(rig: WorkerRig, theme: Theme | null, color: string, outfit: THREE.Object3D[]) {
@@ -26,6 +28,8 @@ export function dressUp(rig: WorkerRig, theme: Theme | null, color: string, outf
     wear(rig.body, elfHat());
     wear(rig.body, elfWorker(rig.skin));
     for (const f of rig.feet) wear(f, elfBoot());
+  } else if (theme === 'corporate') {
+    wear(rig.body, workerSuit());
   }
 }
 

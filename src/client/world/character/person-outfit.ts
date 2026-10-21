@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import type { Theme } from '../../../shared/protocol';
+import { BRAND } from '../../../shared/brand';
 import { santaHat, warlockHat } from '../costumes';
+import { SHIRT, SUIT } from '../suits';
 import { mesh, toon, toonUnique } from '../toon';
 import { undress } from './props';
 import type { PersonRig } from './rig';
@@ -8,7 +10,8 @@ import type { PersonRig } from './rig';
 // A person dressed for a holiday, head to toe, to match the hands you see in first person (see
 // world/hands.ts): for Halloween a warlock's hat and a purple robe with a ragged hem, a sash, dark
 // trousers and pointed boots; for Christmas a Santa hat and suit, white fur trim, a black belt with a
-// gold buckle, black boots and green mittens. It goes on over their own clothes (each piece a little
+// gold buckle, black boots and green mittens; for the corporate look a navy suit, a white shirt and a
+// tie in the company blue, charcoal trousers and black shoes. It goes on over their own clothes (each piece a little
 // bigger than what it covers), hung off the parts it moves with: the torso and legs (which you see
 // looking down in first person, see person-first.ts), the arms and the head.
 
@@ -47,7 +50,7 @@ function fur(r: number, tube: number, y: number): THREE.Mesh {
   return m;
 }
 
-/** What a person has on for a holiday (see set), and taking it off again. */
+/** What a person has on for the theme (see set), and taking it off again. */
 export class HolidayOutfit {
   private parts: THREE.Object3D[] = [];
 
@@ -58,6 +61,7 @@ export class HolidayOutfit {
     undress(this.parts);
     if (theme === 'halloween') this.warlock();
     else if (theme === 'christmas') this.santa();
+    else if (theme === 'corporate') this.suit();
     for (const p of this.parts) p.traverse((o) => ((o as THREE.Mesh).castShadow = true));
   }
 
@@ -126,6 +130,33 @@ export class HolidayOutfit {
       boot.add(mesh(new THREE.CylinderGeometry(0.115, 0.115, 0.16, 14), toon('#1d1d1d'), 0, 0.03, 0));
       boot.add(mesh(new THREE.SphereGeometry(0.1, 12, 10), toon('#1d1d1d'), 0, -0.03, 0.07));
       this.put(leg, boot);
+    }
+  }
+
+  private suit() {
+    const { armL, armR, legL, legR } = this.rig;
+    const navy = toon(SUIT);
+    this.put(this.torso, mesh(new THREE.CapsuleGeometry(0.272, 0.28, 6, 14), navy));
+    // The shirt showing in the jacket's V, the tie down over it, and the jacket's buttons.
+    const v = new THREE.Shape([new THREE.Vector2(-0.12, 0.1), new THREE.Vector2(0.12, 0.1), new THREE.Vector2(0, -0.16)]);
+    const shirt = mesh(new THREE.ShapeGeometry(v), toon(SHIRT), 0, 0.86 - TORSO_Y, 0.276, false);
+    shirt.rotation.x = -0.25;
+    this.put(this.torso, shirt);
+    const tie = toon(BRAND.blue);
+    this.put(this.torso, mesh(new THREE.BoxGeometry(0.055, 0.045, 0.03), tie, 0, 0.925 - TORSO_Y, 0.268));
+    const blade = new THREE.Shape([new THREE.Vector2(-0.025, 0), new THREE.Vector2(0.025, 0), new THREE.Vector2(0.04, -0.17), new THREE.Vector2(0, -0.21), new THREE.Vector2(-0.04, -0.17)]);
+    this.put(this.torso, mesh(new THREE.ShapeGeometry(blade), tie, 0, 0.905 - TORSO_Y, 0.286, false));
+    for (const y of [0.66, 0.56]) this.put(this.torso, mesh(new THREE.SphereGeometry(0.018, 8, 6), toon('#0d1626'), 0, y - TORSO_Y, 0.274, false));
+    for (const arm of [armL, armR]) {
+      this.put(arm, sleeve(0.09, navy));
+      this.put(arm, band(0.08, 0.04, toon(SHIRT), HAND + 0.1));
+    }
+    for (const leg of [legL, legR]) {
+      this.put(leg, sleeve(0.106, toon('#2e3440')));
+      const shoe = new THREE.Group();
+      shoe.position.y = FOOT;
+      shoe.add(mesh(new THREE.SphereGeometry(0.1, 12, 10), toon('#14171c'), 0, -0.02, 0.05));
+      this.put(leg, shoe);
     }
   }
 }

@@ -131,9 +131,9 @@ export interface SkyState {
   realTime?: boolean;
 }
 
-/** A holiday the whole building dresses up for (see shared/theme.ts). */
-export type Theme = 'halloween' | 'christmas';
-/** What someone picked in ⚙️ Settings: a holiday, none, or whichever the calendar says. */
+/** A holiday the whole building dresses up for, or the company's own look (see shared/theme.ts). */
+export type Theme = 'halloween' | 'christmas' | 'corporate';
+/** What someone picked in ⚙️ Settings: a theme, none, or whichever holiday the calendar says. */
 export type ThemePick = Theme | 'auto' | 'off';
 
 /** The building's holiday theme: the same on every floor, for everyone. */
@@ -141,7 +141,7 @@ export interface ThemeState {
   pick: ThemePick;
   /** What's up right now: the pick, or for 'auto' the holiday it is at the office. Null for none. */
   active: Theme | null;
-  /** Who picked it, and when. Unset for the default (auto). */
+  /** Who picked it, and when. Unset for the default (corporate). */
   by?: string;
   at?: number;
 }

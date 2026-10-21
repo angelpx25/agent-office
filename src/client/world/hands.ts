@@ -6,6 +6,7 @@ import { OpenBook } from '../features/bookshelf/book';
 import { HeldCard } from '../features/carrying/card';
 import { REACH_TIME, SMOKE_CYCLE, cigarette, coffeeMug, dragCurve, drinkGlass, emoteEnvelope, putDownGlass, reachCurve } from './character';
 import { UNDEAD_SKIN, raggedCuff, warlockHand, witchFire } from './costumes';
+import { SUIT } from './suits';
 import { mesh, toon, toonUnique } from './toon';
 import { ballMesh } from '../features/basketball/world';
 
@@ -222,7 +223,7 @@ export class Hands {
 
   private paint() {
     const c = this.costume;
-    this.sleeve.color.set(c === 'halloween' ? '#3b1d5a' : c === 'christmas' ? '#d62828' : this.shirt);
+    this.sleeve.color.set(c === 'halloween' ? '#3b1d5a' : c === 'christmas' ? '#d62828' : c === 'corporate' ? SUIT : this.shirt);
     this.skin.color.set(c === 'christmas' ? '#2e9e48' : this.skinTone);
     if (c === 'halloween') this.skin.color.lerp(UNDEAD_SKIN, 0.8);
   }
