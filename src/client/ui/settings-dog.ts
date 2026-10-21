@@ -1,8 +1,8 @@
-// ⚙️ Settings' Office dog, under Building: its name, and its breed and coat as buttons, for everyone
-// on the floor (see server/dog.ts).
+// ⚙️ Settings' Office pet, under Building: the dog's name, and its breed (or a cat) and coat as buttons,
+// for everyone on the floor (see server/dog.ts).
 import type { Net } from '../net';
 import { store } from '../state';
-import { DOG_BREEDS, DOG_BREED_NAMES, DOG_COATS, DOG_COAT_NAMES, DOG_NAME_MAX, cleanDogName, dogBreed } from '../../shared/dog';
+import { DOG_BREEDS, DOG_BREED_NAMES, DOG_COATS, DOG_COAT_NAMES, DOG_NAME_MAX, cleanDogName, dogBreed, isCat } from '../../shared/dog';
 import { h } from './dom';
 
 /** The setting, made by `frame` from what goes in it, and how to paint it afresh when the dog changes. */
@@ -18,7 +18,8 @@ export function dogSetting(net: Net, frame: (body: Node[]) => HTMLElement): { se
     dogSection.classList.toggle('hidden', !dog);
     if (!dog) return;
     dogInput.placeholder = dog.name;
-    dogNote.textContent = `${dog.name} lives on this floor. When a worker needs input, ${dog.name} runs to its desk and barks. Walk up and press E to pet it. Its name, breed and coat are for everyone on this floor.`;
+    const cat = isCat(dog.breed);
+    dogNote.textContent = `${dog.name} lives on this floor. When a worker needs input, ${dog.name} runs to its desk and ${cat ? 'meows' : 'barks'}. Walk up and press E to pet it. Its name, ${cat ? 'kind' : 'breed'} and coat are for everyone on this floor.`;
     const breed = dogBreed(dog.breed);
     breedRow.replaceChildren(
       ...DOG_BREEDS.map((b) =>

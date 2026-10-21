@@ -1,6 +1,7 @@
 import type { Ctx } from '../../core/context';
 import { aside, hintTitle, key, onE } from '../../core/hint';
 import { noOutline } from '../../core/outline';
+import { isCat } from '../../../shared/dog';
 import { store } from '../../state';
 import { Dog } from './world';
 
@@ -35,7 +36,7 @@ export function installDog(ctx: Ctx): Dog {
         (id) => store.workers.get(id)?.name,
         (id) => (id === store.you ? 'you' : store.peers.get(id)?.name),
       );
-      return { k: `${dog.name}|${doing}`, parts: [hintTitle(`🐶 ${dog.name}`), doing ? aside(doing) : '', key('E', 'Pet')] };
+      return { k: `${dog.name}|${doing}`, parts: [hintTitle(`${isCat(store.dog?.breed) ? '🐱' : '🐶'} ${dog.name}`), doing ? aside(doing) : '', key('E', 'Pet')] };
     },
     use: onE(() => ctx.net.send({ t: 'dog.pet' })),
   });

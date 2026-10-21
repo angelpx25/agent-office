@@ -23,7 +23,7 @@ import { carDoor, crash, honk, Motors, type Engine } from '../features/cars/soun
 import { bonk, hatch, poleLanding, rung, slide, twirl } from '../features/climbing/sound';
 import { coffee } from '../features/coffee/sound';
 import { AudioCore, type Hall, type Listener } from './core';
-import { bark, yip } from '../features/dog/sound';
+import { bark, meow, mew, yip } from '../features/dog/sound';
 import { airlock, cellDoor, thud } from '../features/workers/sound';
 import { golf, type GolfSound } from '../features/golf/sound';
 import { gong } from '../features/gong/sound';
@@ -246,12 +246,14 @@ export class OfficeSound {
     coffee(this.a);
   }
 
-  bark(x: number, z: number, times: number) {
-    bark(this.a, x, z, times);
+  bark(x: number, z: number, times: number, cat = false) {
+    if (cat) meow(this.a, x, z, times);
+    else bark(this.a, x, z, times);
   }
 
-  yip(x: number, z: number) {
-    yip(this.a, x, z);
+  yip(x: number, z: number, cat = false) {
+    if (cat) mew(this.a, x, z);
+    else yip(this.a, x, z);
   }
 
   thunder(delay: number, loud: number) {

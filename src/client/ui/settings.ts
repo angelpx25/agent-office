@@ -29,7 +29,7 @@ const PANES: { id: SettingsPane; icon: string; label: string; blurb: string }[] 
   { id: 'you', icon: '🧍', label: 'You', blurb: 'How you look, how you see the office, and how you’re signed in.' },
   { id: 'sound', icon: '🔊', label: 'Sound & voice', blurb: 'How loud the office is for you, and how voice chat works.' },
   { id: 'notify', icon: '🔔', label: 'Notifications', blurb: 'Hear about a worker that needs someone, or finished, while you’re somewhere else.' },
-  { id: 'building', icon: '🏢', label: 'Building', blurb: 'The map, the decorations, the sky, the dog, and where new floors are cloned.' },
+  { id: 'building', icon: '🏢', label: 'Building', blurb: 'The map, the decorations, the sky, the dog (or cat), and where new floors are cloned.' },
   { id: 'workers', icon: '🤖', label: 'Workers', blurb: 'What workers start on, how many run at once, when they go home and what the office tells them.' },
 ];
 
@@ -434,7 +434,7 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
   dirDefault.addEventListener('click', () => net.send({ t: 'floor.projectsDir', dir: '' }));
 
   // The dog on this floor: its name, breed and coat, for everyone here (see settings-dog.ts).
-  const { section: dogSection, paint: paintDog } = dogSetting(net, (body) => setting('Office dog', 'floor', ...body));
+  const { section: dogSection, paint: paintDog } = dogSetting(net, (body) => setting('Office pet', 'floor', ...body));
 
   // What the sky's doing, and which clock it keeps (see settings-sky.ts).
   const sky = outside && outsideSetting(net, outside, (body) => setting('Outside', 'office', ...body));
