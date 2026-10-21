@@ -33,11 +33,19 @@ export const DOG_NAME_MAX = 24;
 /** A new floor's dog is called one of these until someone names it in ⚙️ Settings (none is a worker's name). */
 export const DOG_NAMES = ['Biscuit', 'Pancake', 'Peanut', 'Pepper', 'Cookie', 'Bagel', 'Ziggy', 'Pretzel', 'Maple', 'Scout'];
 
-/** A floor's dog is one of these, each its own model (dog-<breed>.glb) with the same rig and clips. */
-export const DOG_BREEDS = ['pup', 'corgi', 'dachshund', 'pug', 'shiba', 'pomeranian'] as const;
+/**
+ * A floor's dog is one of these, each its own model (dog-<breed>.glb) with the same rig and clips. The cat is
+ * the one that isn't a dog: it does all the same things, but meows where a dog barks (see isCat).
+ */
+export const DOG_BREEDS = ['pup', 'corgi', 'dachshund', 'pug', 'shiba', 'pomeranian', 'cat'] as const;
 export type DogBreed = (typeof DOG_BREEDS)[number];
 /** What ⚙️ Settings calls each breed. */
-export const DOG_BREED_NAMES: Record<DogBreed, string> = { pup: '🐶 Pup', corgi: '🦊 Corgi', dachshund: '🌭 Dachshund', pug: '🐾 Pug', shiba: '🍂 Shiba', pomeranian: '🧸 Pomeranian' };
+export const DOG_BREED_NAMES: Record<DogBreed, string> = { pup: '🐶 Pup', corgi: '🦊 Corgi', dachshund: '🌭 Dachshund', pug: '🐾 Pug', shiba: '🍂 Shiba', pomeranian: '🧸 Pomeranian', cat: '🐱 Cat' };
+
+/** The floor's pet is the cat: it meows rather than barks, and is called a cat. */
+export function isCat(breed: unknown): boolean {
+  return breed === 'cat';
+}
 
 /**
  * The breeds a floor's dog is dealt from its id (see dogDefaults): the ones there were when floors first

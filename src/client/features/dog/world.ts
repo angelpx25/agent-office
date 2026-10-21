@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { BARK_EVERY_S, BARK_FOR_S, DOG_COATS, dogAt, dogBreed, legSeconds, type DogAct, type DogBreed, type DogState } from '../../../shared/dog';
+import { BARK_EVERY_S, BARK_FOR_S, DOG_COATS, dogAt, dogBreed, isCat, legSeconds, type DogAct, type DogBreed, type DogState } from '../../../shared/dog';
 import type { Theme } from '../../../shared/protocol';
 import { paintCoat } from './coat';
 import { dogAntlers, dogBatWings, dogRedNose, dogScarf, dogWitchHat } from '../../world/costumes';
@@ -8,9 +8,10 @@ import type { Interactable } from '../../world/types';
 import { disposeSprite, textSprite, toon, toonUnique } from '../../world/toon';
 
 export interface DogSounds {
-  bark(x: number, z: number, times: number): void;
-  /** A happy little yip, when someone pets it. */
-  yip(x: number, z: number): void;
+  /** Barks (or, the cat, meows) `times` times. */
+  bark(x: number, z: number, times: number, cat: boolean): void;
+  /** A happy little yip (or the cat's mew), when someone pets it. */
+  yip(x: number, z: number, cat: boolean): void;
 }
 
 /** What it's doing, as its clips have it: one of its acts, or on its way there at a trot or, in a hurry, a gallop. */
@@ -246,7 +247,7 @@ export class Dog {
     // Just petted (not a pat from before this page loaded).
     if (state.act === 'wag' && state.petBy && performance.now() - start < 1000) {
       const p = dogAt(state, 0);
-      this.sounds.yip(p.x, p.z);
+      this.sounds.yip(p.x, p.z, isCat(state.breed));
       this.say('wag', '❤️', 2.2);
     }
   }
@@ -260,7 +261,7 @@ export class Dog {
     if (s.following) return `following ${personName(s.following) ?? 'someone'}`;
     switch (s.act) {
       case 'bark':
-        return moving ? `running to ${w}, who needs input` : `barking at ${w}: needs input`;
+        return moving ? `running to ${w}, who needs input` : `${isCat(s.breed) ? 'meowing' : 'barking'} at ${w}: needs input`;
       case 'nap':
         return moving ? 'off for a nap' : `napping under ${w}'s desk`;
       case 'wag':
@@ -303,9 +304,10 @@ export class Dog {
     // Woof, on schedule, while nobody's seeing to the worker yet.
     if (!at.moving && s.act === 'bark' && s.workerId && now >= this.nextBark && now - this.arriveAt < BARK_FOR_S * 1000) {
       if (!this.hushed(s.workerId)) {
-        this.sounds.bark(at.x, at.z, this.barks === 0 ? 3 : 2);
+        const n = this.barks === 0 ? 3 : 2, cat = isCat(s.breed);
+        this.sounds.bark(at.x, at.z, n, cat);
         this.woofT = 0;
-        this.say('woof', this.barks === 0 ? 'Woof! Woof! Woof!' : 'Woof! Woof!', 1.4);
+        this.say('woof', (cat ? 'Meow! ' : 'Woof! ').repeat(n).trimEnd(), 1.4);
       }
       this.barks++;
       this.nextBark = this.arriveAt + this.barks * BARK_EVERY_S * 1000;

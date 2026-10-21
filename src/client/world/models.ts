@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import deskPropsUrl from '../models/desk_props.glb?url';
+import dogCatUrl from '../models/dog-cat.glb?url';
 import dogCorgiUrl from '../models/dog-corgi.glb?url';
 import dogDachshundUrl from '../models/dog-dachshund.glb?url';
 import dogPugUrl from '../models/dog-pug.glb?url';
@@ -24,6 +25,7 @@ const MODELS = {
   'dog-pug': { url: dogPugUrl, preload: false },
   'dog-shiba': { url: dogShibaUrl, preload: false },
   'dog-pomeranian': { url: dogPomeranianUrl, preload: false },
+  'dog-cat': { url: dogCatUrl, preload: false },
   desk_props: { url: deskPropsUrl, preload: true },
   kitchen: { url: kitchenUrl, preload: true },
   lounge: { url: loungeUrl, preload: true },
