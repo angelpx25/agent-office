@@ -3,6 +3,7 @@
  * the new one's put up with everyone in their seats, and you come in where it has you arrive. Also
  * the floor's paint, down off a roof the map doesn't have, and who's waiting on another floor.
  */
+import { CORPORATE_LOOK } from '../../shared/brand';
 import { floorPalette } from '../../shared/floors';
 import { store } from '../state';
 import { $, toast } from '../ui/dom';
@@ -20,16 +21,17 @@ export function installMaps(ctx: Ctx, core: CoreState, parts: MapsParts) {
   const { holiday } = parts.stage;
   const { inOffice, plan } = parts.worlds;
 
-  /** Which of the floor palettes the walls are painted in now. */
-  let painted = -1;
+  /** Which of the floor palettes the walls are painted in now, or the corporate theme's look (see shared/brand.ts). */
+  let painted: number | 'corporate' = -1;
   function paintFloor() {
-    const p = store.currentFloor()?.palette ?? 0;
+    const p = store.theme.active === 'corporate' ? 'corporate' : (store.currentFloor()?.palette ?? 0);
     if (p === painted) return;
     painted = p;
-    ctx.world().setLook(floorPalette(p));
+    ctx.world().setLook(p === 'corporate' ? CORPORATE_LOOK : floorPalette(p));
   }
   // A brand-new floor can arrive before the elevator's list says what color it is.
   store.on('floors', paintFloor);
+  store.on('theme', paintFloor);
 
   /**
    * The building changed maps (or you arrived and it's not the office): the old world goes, the new

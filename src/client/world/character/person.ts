@@ -246,7 +246,7 @@ export class Person {
     this.skin.color.set(SKIN_TONES[this.look.skin]);
     if (this.costume === 'halloween') this.skin.color.lerp(UNDEAD_SKIN, 0.7);
     const style = HAIR_STYLES[this.look.style];
-    this.hair.visible = !this.costume || !(style === 'Spiky' || style === 'Bun' || style === 'Curly');
+    this.hair.visible = !this.costume || this.costume === 'corporate' || !(style === 'Spiky' || style === 'Bun' || style === 'Curly');
   }
 
   /** Hair is a set of shapes on the head (see styleHair). */

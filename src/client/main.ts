@@ -43,6 +43,7 @@ import { installDictation } from './features/dictation';
 import { installDog } from './features/dog';
 import { installEmotes } from './features/emotes';
 import { installGolf } from './features/golf';
+import { installBrand } from './features/brand';
 import { installGong } from './features/gong';
 import { installGallery, installHanging } from './features/hanging';
 import { installHerald } from './features/herald';
@@ -154,6 +155,7 @@ parts.bar = installBar(ctx, { roof: parts.rooftop.roof, djAt: parts.rooftop.djAt
 parts.coffee = installCoffee(ctx);
 parts.smoking = installSmoke(ctx);
 installLamplight(ctx, parts);
+installBrand(ctx, { decorations: parts.stage.holiday.group });
 parts.hoops = installBasketball(ctx, { remotes: parts.peers.remotes, reach });
 parts.cards = installCarrying(ctx, {
   hold: (card) => void (core.carrying = card),

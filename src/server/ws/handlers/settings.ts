@@ -4,6 +4,7 @@ import path from 'node:path';
 import { OPEN_CODE_MODEL_MAX } from '../../../shared/providers.js';
 import { MAX_WORKER_LIMIT, parseWorkerLimit } from '../../machine.js';
 import { OFFICE_MAP } from '../../../shared/maps/index.js';
+import { BRAND } from '../../../shared/brand.js';
 import { isThemePick } from '../../../shared/theme.js';
 import { PROMPTS, PROMPT_MAX, isPromptId } from '../../../shared/prompts.js';
 import type { SettingsClientMsg } from '../../../shared/protocol.js';
@@ -71,13 +72,15 @@ export const settingsHandlers = {
     ctx.themes.set(msg.pick, who);
     const now = ctx.themes.state().active;
     ctx.toastAll(
-      msg.pick === 'halloween'
-        ? `🎃 ${who} dressed the office up for Halloween`
-        : msg.pick === 'christmas'
-          ? `🎄 ${who} dressed the office up for Christmas`
-          : msg.pick === 'off'
-            ? `${who} took the holiday decorations down`
-            : `📅 ${who} set the decorations to follow the calendar${now ? ` (it's ${now === 'halloween' ? 'Halloween 🎃' : 'Christmas 🎄'} season)` : ''}`,
+      msg.pick === 'corporate'
+        ? `💼 ${who} put the office in its ${BRAND.short} corporate look`
+        : msg.pick === 'halloween'
+          ? `🎃 ${who} dressed the office up for Halloween`
+          : msg.pick === 'christmas'
+            ? `🎄 ${who} dressed the office up for Christmas`
+            : msg.pick === 'off'
+              ? `${who} took the theme down`
+              : `📅 ${who} set the decorations to follow the calendar${now ? ` (it's ${now === 'halloween' ? 'Halloween 🎃' : 'Christmas 🎄'} season)` : ''}`,
     );
   },
   'sky.clock'(ctx, c, msg) {

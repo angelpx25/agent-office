@@ -4,6 +4,7 @@ import type { OfficeSound } from '../sound';
 import { store, type NeedsYouSound, type Settings, type ViewMode } from '../state';
 import { askNotifyPermission, notifyPermission, type DesktopNotifier } from '../notify';
 import type { ThemePick, WebhookKind } from '../../shared/protocol';
+import { BRAND } from '../../shared/brand';
 import { THEME_PICKS } from '../../shared/theme';
 import { mapChoices } from '../../shared/maps';
 import { dogSetting } from './settings-dog';
@@ -18,7 +19,7 @@ const VIEWS: [ViewMode, string, string][] = [
   ['third', '🎥 Third person', 'Follow your character from behind. Drag to orbit the camera, scroll to zoom, and click things to use them.'],
 ];
 
-const THEME_LABEL: Record<ThemePick, string> = { auto: '📅 By the calendar', halloween: '🎃 Halloween', christmas: '🎄 Christmas', off: 'Off' };
+const THEME_LABEL: Record<ThemePick, string> = { corporate: `💼 ${BRAND.short}`, auto: '📅 By the calendar', halloween: '🎃 Halloween', christmas: '🎄 Christmas', off: 'Off' };
 
 const WEBHOOK_NAME: Record<WebhookKind, string> = { slack: 'Slack', discord: 'Discord', other: 'a webhook' };
 
@@ -127,8 +128,8 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
     if (needsYouSound !== 'off') sound.needsYou();
   });
 
-  // The building's holiday theme, for everyone.
-  const themeRow = h('div.seg', { role: 'radiogroup', 'aria-label': 'Holiday theme' });
+  // The building's theme, for everyone.
+  const themeRow = h('div.seg', { role: 'radiogroup', 'aria-label': 'Theme' });
   const themeNote = h('p.setting-note');
   const paintTheme = () => {
     const { pick, active, by, at } = store.theme;
@@ -150,11 +151,13 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
       ),
     );
     const now =
-      active === 'halloween'
-        ? 'Halloween: the workers are zombies, your hands are an undead warlock’s, the dog’s in costume, the sky’s gone creepy and there are jack-o’-lanterns everywhere.'
-        : active === 'christmas'
-          ? 'Christmas: the workers are elves, your hands are in mittens, the dog’s Rudolph, and it’s snowing outside.'
-          : 'No decorations up right now.';
+      active === 'corporate'
+        ? `${BRAND.short}: the office in ${BRAND.name}’s colors, with its services on the walls, a server rack under the machine’s monitor, everyone in a suit and tie, and a calmer, sharper look for every window.`
+        : active === 'halloween'
+          ? 'Halloween: the workers are zombies, your hands are an undead warlock’s, the dog’s in costume, the sky’s gone creepy and there are jack-o’-lanterns everywhere.'
+          : active === 'christmas'
+            ? 'Christmas: the workers are elves, your hands are in mittens, the dog’s Rudolph, and it’s snowing outside.'
+            : 'No theme up right now.';
     const how = pick === 'auto' ? ' By the calendar it’s Halloween through October and Christmas through December.' : '';
     themeNote.textContent = `${now}${how} It’s the same for everyone in the building${by ? `, set by ${by}${at ? ` ${timeAgo(at)}` : ''}` : ''}.`;
   };
@@ -461,7 +464,7 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
     ],
     building: [
       setting('Map', 'office', mapRow, mapNote, mapBad),
-      setting('Holiday theme', 'office', themeRow, themeNote),
+      setting('Theme', 'office', themeRow, themeNote),
       ...(sky ? [sky.section] : []),
       dogSection,
       setting('Workspace folder', 'office', dirRow, dirActions, dirNote),

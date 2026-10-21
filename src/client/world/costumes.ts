@@ -28,7 +28,7 @@ const Z = new THREE.Vector3(0, 0, 1);
 // ---- The workers --------------------------------------------------------------------------------
 
 /** The worker's bean-shaped body (see Worker): a capsule standing at y 0.4..0.7, 0.28 round. */
-const BEAN = { y: 0.55, half: 0.15, r: 0.28 } as const;
+export const BEAN = { y: 0.55, half: 0.15, r: 0.28 } as const;
 
 /** A point on the bean at height `y`, `a` round from the front (+z; +x is positive), `out` off its surface, and which way is out there. */
 function onBean(y: number, a: number, out = 0): { at: THREE.Vector3; normal: THREE.Vector3 } {
@@ -40,7 +40,7 @@ function onBean(y: number, a: number, out = 0): { at: THREE.Vector3; normal: THR
 }
 
 /** Lays `m` on the bean at (y, a), its +z pointing out of the surface. */
-function stick<T extends THREE.Object3D>(m: T, y: number, a: number, out = 0): T {
+export function stick<T extends THREE.Object3D>(m: T, y: number, a: number, out = 0): T {
   const { at, normal } = onBean(y, a, out);
   m.position.copy(at);
   m.quaternion.setFromUnitVectors(Z, normal);

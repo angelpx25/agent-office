@@ -393,7 +393,10 @@ test('settings, accounts, sign-ins and the boards answer as before', async () =>
   a.send({ t: 'theme.set', pick: 'nope' });
   a.send({ t: 'theme.set', pick: 'off' });
   assert.equal((await a.take('theme')).state.pick, 'off');
-  assert.equal(await told('Eve took'), 'Eve took the holiday decorations down');
+  assert.equal(await told('Eve took'), 'Eve took the theme down');
+  a.send({ t: 'theme.set', pick: 'corporate' });
+  assert.equal((await a.take('theme')).state.active, 'corporate');
+  assert.equal(await told('💼 Eve'), '💼 Eve put the office in its DeltaNet corporate look');
   a.send({ t: 'map.set', map: 'nowhere' });
   await warned('There’s no map by that name, or it won’t load: see ⚙️ Settings');
   a.send({ t: 'machine.limit', limit: 0 });

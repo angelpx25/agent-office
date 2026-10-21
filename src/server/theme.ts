@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import type { ThemePick, ThemeState } from '../shared/protocol.js';
-import { activeTheme, isThemePick } from '../shared/theme.js';
+import { DEFAULT_THEME_PICK, activeTheme, isThemePick } from '../shared/theme.js';
 
 /** How often 'auto' looks at the calendar again, so October 1st turns the pumpkins on by itself. */
 const CHECK_MS = 10 * 60_000;
@@ -13,7 +13,7 @@ interface Saved {
 }
 
 /**
- * The building's holiday theme (Halloween, Christmas, none, or whichever the calendar says), picked
+ * The building's theme (the corporate look, Halloween, Christmas, none, or whichever holiday the calendar says), picked
  * in ⚙️ Settings by anyone and kept in .agent-office/theme.json. Everyone sees the same one.
  */
 export class Themes {
@@ -43,7 +43,7 @@ export class Themes {
   }
 
   state(): ThemeState {
-    const pick = this.saved?.pick ?? 'auto';
+    const pick = this.saved?.pick ?? DEFAULT_THEME_PICK;
     return { pick, active: activeTheme(pick, Date.now(), this.utcOffset()), ...(this.saved ? { by: this.saved.by, at: this.saved.at } : {}) };
   }
 
@@ -67,7 +67,7 @@ export class Themes {
       const s = JSON.parse(readFileSync(this.path, 'utf8')) as Partial<Saved>;
       if (isThemePick(s.pick)) this.saved = { pick: s.pick, by: typeof s.by === 'string' ? s.by : 'someone', at: typeof s.at === 'number' ? s.at : 0 };
     } catch {
-      // never set: it follows the calendar
+      // never set: the default
     }
   }
 
