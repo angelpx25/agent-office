@@ -13,8 +13,9 @@ import { DANCE, groove, type Dancing, type Stage } from './worker-dance';
 import { DEAD, STARVED, bones, crossedEyes, slump } from './worker-jail';
 import { packUp, waddle, type Leaving } from './worker-leave';
 import { dressUp, growBeard, wearGarb } from './worker-dress';
+import { humanBody } from './worker-human';
 
-/** The little Claude worker that sits at a desk. Forward is +z. */
+/** The little person, one of the office's workers, who sits at a desk. Forward is +z. */
 export class Worker {
   readonly root = new THREE.Group();
   private body = new THREE.Group();
@@ -107,31 +108,30 @@ export class Worker {
     const ink = toon('#1d1d1d');
 
     this.root.add(this.body);
-    // Bean-shaped body
-    const bean = mesh(new THREE.CapsuleGeometry(0.28, 0.3, 8, 16), skin, 0, 0.55, 0);
-    this.body.add(bean);
-    // Big cartoon eyes
+    // A bean-shaped person: its face and hair, and its clothes in its color (see worker-human.ts).
+    const { face, hair } = humanBody(this.body, skin, `${name}|${color}`);
+    this.headset.push(hair);
+    // Eyes
     for (const sx of [-1, 1]) {
-      const eye = mesh(new THREE.SphereGeometry(0.09, 12, 10), white, sx * 0.11, 0.7, 0.23, false);
+      const eye = mesh(new THREE.SphereGeometry(0.062, 12, 10), white, sx * 0.11, 0.7, 0.245, false);
       eye.scale.z = 0.6;
       this.body.add(eye);
-      const pupil = mesh(new THREE.SphereGeometry(0.045, 10, 8), ink, sx * 0.11, 0.7, 0.29, false);
+      const pupil = mesh(new THREE.SphereGeometry(0.034, 10, 8), ink, sx * 0.11, 0.7, 0.28, false);
       this.body.add(pupil);
       this.eyes.push(eye, pupil);
       this.pupils.push(pupil);
     }
-    // Headset: band + mic
-    const band = mesh(new THREE.TorusGeometry(0.29, 0.025, 6, 20, Math.PI), toon('#2b2d42'), 0, 0.72, 0, false);
-    band.rotation.y = Math.PI / 2;
+    // Headset: a band over the top of its head, ear to ear
+    const band = mesh(new THREE.TorusGeometry(0.315, 0.025, 6, 20, Math.PI), toon('#2b2d42'), 0, 0.72, 0, false);
+    band.rotation.x = -0.2;
     this.body.add(band);
     this.headset.push(band);
     for (const sx of [-1, 1]) {
-      const cup = mesh(new THREE.SphereGeometry(0.07, 10, 8), toon('#2b2d42'), sx * 0.29, 0.72, 0, false);
+      const cup = mesh(new THREE.SphereGeometry(0.07, 10, 8), toon('#2b2d42'), sx * 0.31, 0.72, 0, false);
       this.body.add(cup);
       this.headset.push(cup);
     }
-    // Antenna with status bulb
-    this.body.add(mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.22, 6), toon('#2b2d42'), 0, 1.07, 0, false));
+    // Its status light, floating over its head.
     this.bulb = toonUnique(STATUS_BULB.starting);
     this.bulb.emissive = new THREE.Color(STATUS_BULB.starting).multiplyScalar(0.6);
     this.bulbMesh = mesh(new THREE.SphereGeometry(0.075, 12, 10), this.bulb, 0, 1.2, 0, false);
@@ -140,14 +140,14 @@ export class Worker {
     const arm = (x: number) => {
       const pivot = new THREE.Group();
       pivot.position.set(x, 0.55, 0.05);
-      pivot.add(mesh(new THREE.CapsuleGeometry(0.055, 0.16, 4, 8), skin, 0, -0.12, 0));
+      pivot.add(mesh(new THREE.CapsuleGeometry(0.055, 0.16, 4, 8), skin, 0, -0.12, 0), mesh(new THREE.SphereGeometry(0.05, 10, 8), face, 0, -0.26, 0));
       this.body.add(pivot);
       return pivot;
     };
     this.armL = arm(-0.3);
     this.armR = arm(0.3);
     for (const sx of [-1, 1]) {
-      const foot = mesh(new THREE.CapsuleGeometry(0.06, 0.1, 4, 8), skin, sx * 0.12, 0.2, 0.05);
+      const foot = mesh(new THREE.CapsuleGeometry(0.06, 0.1, 4, 8), toon('#2b2d42'), sx * 0.12, 0.2, 0.05);
       this.body.add(foot);
       this.feet.push(foot);
     }
