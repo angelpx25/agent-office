@@ -59,7 +59,7 @@ Two documented gaps rule it out as a foundation:
   `SubagentStop`; the Codex bridge supports five events and no permission event at all. The office
   derives `needs_input` from exactly those missing events (`claudeHook`, `codexHook` in
   `src/server/providers/`), so a DSH worker could never signal that it is waiting on a human — the
-  jump, the ding and the antenna bulb would not fire.
+  jump, the ding and the status light would not fire.
 - **`transcript_path` is never populated** — empty string in the Claude bridge, `null` in the Codex
   bridge, because DSH's session log is Zstandard-compressed and not readable by hook scripts. That
   breaks both Claude-style transcript costing and the Codex rollout reader, so usage goes dark.
