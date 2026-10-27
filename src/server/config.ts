@@ -61,7 +61,14 @@ export interface Config {
   weather?: Weather;
   /** The sky keeps real time (a day a day), instead of a whole day and night every hour. */
   realTimeSky: boolean;
+  /** The port of the loopback API for outside automation (see integrations/), when it's on. */
+  integrationPort?: number;
+  /** Who a prompt sent through that API is from, as the office shows it (default "n8n"). */
+  integrationName: string;
 }
+
+/** Where --integrations listens, on loopback, when no --integration-port says otherwise. */
+export const INTEGRATION_PORT = 5690;
 
 export interface RTCIceServerLike {
   urls: string | string[];
@@ -134,6 +141,13 @@ Options:
       --tls-key <file>    ...and this private key (PEM)
       --self-signed       Serve HTTPS with a generated self-signed certificate
       --trust-proxy       Trust X-Forwarded-* headers (behind Caddy/nginx)
+      --integrations      Open the API for outside automation (n8n, scripts) on
+                          127.0.0.1:5690: list workers and tell one a prompt, with
+                          the token in .agent-office/integrations.json (or env
+                          AGENT_OFFICE_INTEGRATION_TOKEN)
+      --integration-port <n>  ...on this port instead (env AGENT_OFFICE_INTEGRATION_PORT)
+      --integration-name <s>  Who its prompts are from in the office (default "n8n",
+                          env AGENT_OFFICE_INTEGRATION_NAME)
       --turn <url>        Add a TURN server for voice (repeatable), e.g.
                           turn:user:pass@turn.example.com:3478 (env
                           AGENT_OFFICE_TURN, several separated by spaces)
@@ -241,6 +255,8 @@ export function loadConfig(argv: string[]): Config {
   let city = process.env.AGENT_OFFICE_CITY || '';
   let weather = process.env.AGENT_OFFICE_WEATHER || '';
   let realTimeSky = process.env.AGENT_OFFICE_SKY_CLOCK === 'real';
+  let integrationPort = process.env.AGENT_OFFICE_INTEGRATION_PORT || '';
+  let integrationName = process.env.AGENT_OFFICE_INTEGRATION_NAME || 'n8n';
   const iceServers: RTCIceServerLike[] = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }];
   // A container can't take --turn (deploy/container/compose.yaml), so the TURN servers come from the environment too.
   for (const url of (process.env.AGENT_OFFICE_TURN ?? '').split(/\s+/).filter(Boolean)) iceServers.push(parseTurn(url));
@@ -285,6 +301,15 @@ export function loadConfig(argv: string[]): Config {
         break;
       case '--trust-proxy':
         trustProxy = true;
+        break;
+      case '--integrations':
+        integrationPort ||= String(INTEGRATION_PORT);
+        break;
+      case '--integration-port':
+        integrationPort = takeValue(argv, i++, a);
+        break;
+      case '--integration-name':
+        integrationName = takeValue(argv, i++, a);
         break;
       case '--claim-token':
         claimToken = takeValue(argv, i++, a);
@@ -366,6 +391,13 @@ export function loadConfig(argv: string[]): Config {
     console.error(`agent-office: --weather is one of ${WEATHERS.join(', ')}`);
     process.exit(2);
   }
+
+  const integrationPortN = integrationPort ? Number(integrationPort) : undefined;
+  if (integrationPortN !== undefined && !(Number.isInteger(integrationPortN) && integrationPortN > 0 && integrationPortN < 65536)) {
+    console.error('agent-office: --integration-port needs a port number, e.g. --integration-port 5690');
+    process.exit(2);
+  }
+  integrationName = integrationName.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 32) || 'n8n';
 
   const dataDir = path.join(dir, '.agent-office');
   mkdirSync(dataDir, { recursive: true, mode: 0o700 });
@@ -463,6 +495,8 @@ export function loadConfig(argv: string[]): Config {
     city: city.trim() || undefined,
     weather: (weather as Weather) || undefined,
     realTimeSky,
+    integrationPort: integrationPortN,
+    integrationName,
   };
 }
 

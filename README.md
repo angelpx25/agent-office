@@ -39,6 +39,9 @@ curl -fsSL https://raw.githubusercontent.com/AgentSystemLabs/agent-office/main/i
 - **From your phone, too.** `/lite` is the office in 2D: every worker and what it's waiting on, its terminal with the keys a phone keyboard lacks, and the boards. The 3D office offers it on a phone or a slow computer.
 - **GitHub on the walls.** Issues and pull requests hang on cork boards. Hand an issue to a worker, queue tasks, give a worker its own git worktree and open its PR with one key (if one gets deleted behind the office's back, the worker waits at its desk until you rebuild it). One task can span several projects: the worker gets a worktree of each, and a PR in each that links the others.
 - **Agents that manage agents.** Every worker can list, hire, message and send home the others, through an `agent-office` MCP server (Claude Code, Codex, OpenCode) or the `office-workers` command. Ask one to "send everyone whose PR merged home" and it does, deleting their worktrees and branches unless they hold unpushed work. A worker that opens its pull request itself (`gh pr create`) shows it at its desk, and one the office missed can be told which is its own (`office-workers pr`).
+- **Outside automation.** Start the office with `--integrations` and n8n, a cron job or any script on the same machine can list a floor's workers and tell one something, at `http://127.0.0.1:5690/integrations` (loopback only), with the token in `~/agent-office/.agent-office/integrations.json`:
+  `curl -H "Authorization: Bearer $TOKEN" -d '{"worker":"Mochi","prompt":"Rebase on main"}' http://127.0.0.1:5690/integrations/tell`.
+  See [Outside automation](docs/configuration.md#outside-automation-n8n).
 - **Together.** Voice, chat, screen sharing on the lounge TV and a shared whiteboard.
 - **DELTANET SERVICES' own office.** The company's name and logo hang over the boards and on the front of the building, and its corporate theme (the default, under **⚙️** → *Theme*) puts its services on the walls, a server rack under the machine monitor, everyone in a suit and tie, every floor in cool greys and navy, and every window in a sharper navy-and-blue style. The name, tagline, services and colors are all in `src/shared/brand.ts`.
 
@@ -405,7 +408,7 @@ Every change to the app that lands on `main` is published as a GitHub release by
 
 - [Features](docs/features.md): everything in the office, room by room
 - [Agents](docs/agents.md): Claude Code, Codex and OpenCode, models and effort, and the office's prompts
-- [Configuration](docs/configuration.md): every command-line option, and where the office keeps its data
+- [Configuration](docs/configuration.md): every command-line option, where the office keeps its data, and the API for outside automation like n8n (`--integrations`)
 - [Maps](docs/maps.md): the castle, the space station, and making a map of your own
 - [Workers' servers on your own computer](docs/tunnel.md): `agent-office tunnel`, which opens every worker's web server on your computer by itself
 - [AWS reference](docs/aws.md): Tailscale, service tunnels, upgrades, and everything `deploy/aws.sh` does

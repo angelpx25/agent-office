@@ -15,6 +15,7 @@ import type { ImageProxy } from '../decor.js';
 import type { Ledger } from '../usage.js';
 import type { PlanLimitsReader } from '../limits.js';
 import type { Webhook } from '../webhook.js';
+import type { Integrations } from '../integrations/index.js';
 import type { Machine } from '../machine.js';
 import type { Building, FloorDef } from '../building.js';
 import type { Floor } from '../floor.js';
@@ -88,6 +89,8 @@ export interface LateServices {
   services: Services;
   images: ImageProxy;
   upgrader: Upgrader;
+  /** The loopback API for outside automation (integrations/). */
+  integrations: Integrations;
   /** A floor's Services board: its own workers' servers. */
   servicesState(floor: Floor | undefined, items?: ServiceInfo[]): ServicesState;
 }
