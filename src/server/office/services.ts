@@ -17,6 +17,7 @@ import { Themes } from '../theme.js';
 import { Maps } from '../maps.js';
 import { OfficePrompts } from '../prompts.js';
 import { LeaveOnMerge } from '../leave-on-merge.js';
+import { startIntegrations } from '../integrations/index.js';
 import type { ServiceInfo, ServicesState } from '../../shared/protocol.js';
 import type { BuildingServices, Ctx, LateServices } from './context.js';
 import type { Client } from './client.js';
@@ -128,7 +129,7 @@ export function createServices(ctx: Ctx): BuildingServices {
   return { sky, themes, maps, prompts, leaveOnMerge, ledger, signins, limits, accountLimits, webhook, machine, limitsOf, pumpQueues };
 }
 
-/** What's made once the floors are open: the SSH team, the tailnet, workers' web servers, pictures and upgrades. */
+/** What's made once the floors are open: the SSH team, the tailnet, workers' web servers, pictures, upgrades and the integration API. */
 export function createLateServices(ctx: Ctx): LateServices {
   const { cfg, clients, floors } = ctx;
   const team = new Team(cfg.publicHost, cfg.port, cfg.tailnet);
@@ -161,5 +162,7 @@ export function createLateServices(ctx: Ctx): LateServices {
       process.kill(process.pid, 'SIGTERM');
     },
   );
-  return { team, tailnet, services, images, upgrader, servicesState };
+  // Outside automation's way in, on loopback (--integrations, see integrations/).
+  const integrations = startIntegrations(ctx);
+  return { team, tailnet, services, images, upgrader, servicesState, integrations };
 }
