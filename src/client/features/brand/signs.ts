@@ -1,9 +1,25 @@
 import * as THREE from 'three';
 import { BRAND } from '../../../shared/brand';
+import wordmarkUrl from './deltanet-logo.png';
+import markUrl from './deltanet-mark.png';
 
 // The company's signs, drawn on canvases: the name sign with its logo, the banner of what it does,
-// a panel per service, the welcome mat and the frosted logo on the meeting room's glass. Each is a
-// flat plane facing +z, unlit (MeshBasicMaterial), so it reads the same by day and by night.
+// a panel per service, the welcome mat and the logo on the meeting room's glass. Each is a flat
+// plane facing +z, unlit (MeshBasicMaterial), so it reads the same by day and by night.
+
+/**
+ * The company's own logo, as deltanetservices.com shows it: the DeltaNet wordmark (a blue D with its
+ * wifi waves, an orange-red N), and the DN mark for the small spots. Both on transparent backgrounds.
+ */
+const LOGO = { wordmark: picture(wordmarkUrl), mark: picture(markUrl) };
+/** When both pictures are in, for the signs painted before then to paint themselves again. */
+const logoLoaded = Promise.all(Object.values(LOGO).map((img) => img.decode().catch(() => undefined)));
+
+function picture(src: string): HTMLImageElement {
+  const img = new Image();
+  img.src = src;
+  return img;
+}
 
 /** The signs' lettering: a plain, sharp sans that every computer has, rather than the office's rounded one. */
 const SANS = "'Segoe UI', 'Helvetica Neue', Arial, sans-serif";
@@ -12,15 +28,29 @@ const PX = 200;
 
 type Draw = (g: CanvasRenderingContext2D, w: number, h: number) => void;
 
-/** A `w` by `h` metre plane facing +z, painted by `draw` on a canvas of the same shape. */
+/**
+ * A `w` by `h` metre plane facing +z, painted by `draw` on a canvas of the same shape: straight away,
+ * and again once the logo has loaded.
+ */
 function sign(w: number, h: number, draw: Draw, transparent = false): THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial> {
   const canvas = document.createElement('canvas');
   canvas.width = Math.round(w * PX);
   canvas.height = Math.round(h * PX);
-  draw(canvas.getContext('2d')!, canvas.width, canvas.height);
+  const g = canvas.getContext('2d')!;
+  const paint = () => {
+    g.clearRect(0, 0, canvas.width, canvas.height);
+    g.save();
+    draw(g, canvas.width, canvas.height);
+    g.restore();
+  };
+  paint();
   const map = new THREE.CanvasTexture(canvas);
   map.colorSpace = THREE.SRGBColorSpace;
   map.anisotropy = 8;
+  void logoLoaded.then(() => {
+    paint();
+    map.needsUpdate = true;
+  });
   const mat = new THREE.MeshBasicMaterial({ map, transparent, depthWrite: !transparent });
   return new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
 }
@@ -38,82 +68,72 @@ function spaced(g: CanvasRenderingContext2D, text: string, x: number, y: number,
   return total;
 }
 
-/**
- * The logo: a delta, blue to cyan, hollow in the middle, with a network's three nodes at its corners.
- * The hollow is painted `hole`, or cut out to see through when that's null.
- */
-export function drawLogo(g: CanvasRenderingContext2D, cx: number, cy: number, size: number, hole: string | null = BRAND.navy) {
-  const r = size / 2;
-  const pts = [0, 1, 2].map((i) => {
-    const a = -Math.PI / 2 + (i * Math.PI * 2) / 3;
-    return [cx + Math.cos(a) * r, cy + r * 0.18 + Math.sin(a) * r] as const;
-  });
-  const grad = g.createLinearGradient(cx - r, cy + r, cx + r, cy - r);
-  grad.addColorStop(0, BRAND.blue);
-  grad.addColorStop(1, BRAND.cyan);
-  g.fillStyle = grad;
-  g.beginPath();
-  pts.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y)));
-  g.closePath();
-  g.fill();
-  g.save();
-  if (hole) g.fillStyle = hole;
-  else g.globalCompositeOperation = 'destination-out';
-  g.beginPath();
-  pts.forEach(([x, y], i) => {
-    const ix = cx + (x - cx) * 0.42;
-    const iy = cy + r * 0.18 + (y - cy - r * 0.18) * 0.42;
-    if (i) g.lineTo(ix, iy);
-    else g.moveTo(ix, iy);
-  });
-  g.closePath();
-  g.fill();
-  g.restore();
-  g.fillStyle = '#ffffff';
-  for (const [x, y] of pts) {
-    g.beginPath();
-    g.arc(x, y, size * 0.07, 0, Math.PI * 2);
-    g.fill();
-  }
-}
-
 /** A rounded rectangle path. */
 function rounded(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   g.beginPath();
   g.roundRect(x, y, w, h, r);
 }
 
-/** The name sign: the logo, DELTANET SERVICES and the tagline, white on navy with a cyan rule. `w` by `w`/5 metres. */
+/** The width a picture of height `h` takes, or `fallback` times `h` before it has loaded. */
+function widthAt(img: HTMLImageElement, h: number, fallback: number): number {
+  return img.naturalWidth ? (h * img.naturalWidth) / img.naturalHeight : h * fallback;
+}
+
+/** `img` as big as fits in the box at (x, y), `w` by `h`, centered in it; nothing while it's loading. */
+function fit(g: CanvasRenderingContext2D, img: HTMLImageElement, x: number, y: number, w: number, h: number) {
+  if (!img.complete || !img.naturalWidth) return;
+  const s = Math.min(w / img.naturalWidth, h / img.naturalHeight);
+  const dw = img.naturalWidth * s;
+  const dh = img.naturalHeight * s;
+  g.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+}
+
+/** The DN mark on a white rounded tile, `s` px square, centered on (cx, cy): it reads on the navy signs. */
+function markTile(g: CanvasRenderingContext2D, cx: number, cy: number, s: number) {
+  rounded(g, cx - s / 2, cy - s / 2, s, s, s * 0.16);
+  g.fillStyle = '#ffffff';
+  g.fill();
+  fit(g, LOGO.mark, cx - s / 2, cy - s / 2, s, s);
+}
+
+/** How wide the wordmark is for its height, until the picture says so itself. */
+const WORDMARK_ASPECT = 986 / 231;
+
+/**
+ * The name sign: the DeltaNet wordmark with SERVICES beside it, the tagline under them and a rule in
+ * the logo's orange-red, on white with a navy edge. `w` by `w`/5 metres.
+ */
 export function nameSign(w: number): THREE.Mesh {
   return sign(w, w / 5, (g, cw, ch) => {
     rounded(g, 0, 0, cw, ch, ch * 0.08);
-    g.fillStyle = BRAND.navy;
+    g.fillStyle = '#ffffff';
     g.fill();
-    g.fillStyle = BRAND.cyan;
-    g.fillRect(ch * 0.12, ch * 0.88, cw - ch * 0.24, ch * 0.025);
-    drawLogo(g, ch * 0.55, ch * 0.44, ch * 0.62);
-    // The first word bold and the rest light, as big as fits between the logo and the right edge.
-    const [first, ...rest] = BRAND.name.split(' ');
-    const words = [first, ` ${rest.join(' ')}`];
-    const weights = [800, 300];
-    const left = ch * 1.05;
-    const room = cw - left - ch * 0.2;
-    const widthAt = (size: number) =>
-      words.reduce((sum, word, i) => {
-        g.font = `${weights[i]} ${size}px ${SANS}`;
-        return sum + [...word].reduce((a, c) => a + g.measureText(c).width + size * 0.07, 0);
-      }, 0);
-    const size = Math.min(ch * 0.42, (ch * 0.42 * room) / widthAt(ch * 0.42));
+    g.strokeStyle = BRAND.navy;
+    g.lineWidth = ch * 0.04;
+    rounded(g, ch * 0.02, ch * 0.02, cw - ch * 0.04, ch - ch * 0.04, ch * 0.07);
+    g.stroke();
+    const margin = ch * 0.3;
+    const top = ch * 0.13;
+    const logoH = ch * 0.5;
+    const logoW = widthAt(LOGO.wordmark, logoH, WORDMARK_ASPECT);
+    const gap = ch * 0.12;
+    // The rest of the name in the wordmark's blue and slant, as big as fits, on the same baseline;
+    // the two of them centered together.
+    const word = BRAND.name.split(' ').slice(1).join(' ');
+    g.font = `italic 800 ${ch}px ${SANS}`;
+    const size = Math.min(ch * 0.34, ((cw - margin * 2 - logoW - gap) / g.measureText(word).width) * ch);
+    g.font = `italic 800 ${size}px ${SANS}`;
+    const left = (cw - (logoW + gap + g.measureText(word).width)) / 2;
+    fit(g, LOGO.wordmark, left, top, logoW, logoH);
+    g.fillStyle = BRAND.logoBlue;
     g.textBaseline = 'alphabetic';
-    let at = left;
-    words.forEach((word, i) => {
-      g.font = `${weights[i]} ${size}px ${SANS}`;
-      g.fillStyle = i ? '#cfe8ff' : '#ffffff';
-      at += spaced(g, word, at, ch * 0.6, size * 0.07) + size * 0.07;
-    });
-    g.font = `600 ${ch * 0.12}px ${SANS}`;
-    g.fillStyle = BRAND.cyan;
-    spaced(g, BRAND.tagline.toUpperCase(), left + ch * 0.02, ch * 0.79, ch * 0.025);
+    g.textAlign = 'left';
+    g.fillText(word, left + logoW + gap, top + logoH * 0.97);
+    g.font = `600 ${ch * 0.11}px ${SANS}`;
+    g.fillStyle = BRAND.navy;
+    spaced(g, BRAND.tagline.toUpperCase(), cw / 2, ch * 0.8, ch * 0.025, 'center');
+    g.fillStyle = BRAND.logoRed;
+    g.fillRect(margin, ch * 0.86, cw - margin * 2, ch * 0.025);
   });
 }
 
@@ -124,7 +144,7 @@ export function banner(text: string, w: number, h: number): THREE.Mesh {
     g.fillRect(0, 0, cw, ch);
     g.fillStyle = BRAND.cyan;
     g.fillRect(0, ch * 0.9, cw, ch * 0.1);
-    drawLogo(g, ch * 0.6, ch * 0.47, ch * 0.62);
+    markTile(g, ch * 0.6, ch * 0.45, ch * 0.66);
     g.font = `600 ${ch * 0.36}px ${SANS}`;
     g.fillStyle = '#ffffff';
     g.textBaseline = 'middle';
@@ -207,7 +227,7 @@ export function servicePanel(i: number, w: number, h: number): THREE.Mesh {
   });
 }
 
-/** The mat in front of the elevator: the logo and a welcome. `w` by `w`/2 metres. */
+/** The mat in front of the elevator: the wordmark on a white plate, and a welcome. `w` by `w`/2 metres. */
 export function welcomeMat(w: number): THREE.Mesh {
   return sign(w, w / 2, (g, cw, ch) => {
     rounded(g, 0, 0, cw, ch, ch * 0.08);
@@ -217,7 +237,10 @@ export function welcomeMat(w: number): THREE.Mesh {
     g.lineWidth = ch * 0.03;
     rounded(g, ch * 0.06, ch * 0.06, cw - ch * 0.12, ch - ch * 0.12, ch * 0.05);
     g.stroke();
-    drawLogo(g, cw / 2, ch * 0.33, ch * 0.34, '#26334d');
+    rounded(g, cw * 0.2, ch * 0.15, cw * 0.6, ch * 0.36, ch * 0.05);
+    g.fillStyle = '#ffffff';
+    g.fill();
+    fit(g, LOGO.wordmark, cw * 0.24, ch * 0.19, cw * 0.52, ch * 0.28);
     g.textAlign = 'center';
     g.fillStyle = '#ffffff';
     g.font = `700 ${ch * 0.13}px ${SANS}`;
@@ -229,18 +252,14 @@ export function welcomeMat(w: number): THREE.Mesh {
   });
 }
 
-/** The logo and the company's short name in navy on glass: see-through round it. `w` by `w`/3 metres. */
+/** The wordmark on glass: see-through round it. `w` by `w`/3 metres. */
 export function frostedLogo(w: number): THREE.Mesh {
   const m = sign(
     w,
     w / 3,
     (g, cw, ch) => {
-      g.globalAlpha = 0.85;
-      drawLogo(g, ch * 0.5, ch * 0.5, ch * 0.6, null);
-      g.fillStyle = BRAND.navy;
-      g.font = `700 ${ch * 0.36}px ${SANS}`;
-      g.textBaseline = 'middle';
-      spaced(g, BRAND.short, ch * 0.95, ch * 0.52, ch * 0.01);
+      g.globalAlpha = 0.9;
+      fit(g, LOGO.wordmark, ch * 0.1, ch * 0.1, cw - ch * 0.2, ch * 0.8);
     },
     true,
   );

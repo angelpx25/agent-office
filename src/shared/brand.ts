@@ -20,6 +20,9 @@ export const BRAND = {
   navy: '#0b2545',
   blue: '#1f6feb',
   cyan: '#22c3e6',
+  /** The logo's own two (deltanetservices.com): the D's blue and the N's orange-red. */
+  logoBlue: '#2030b1',
+  logoRed: '#fc2e08',
 } as const;
 
 /** The corporate theme paints every floor alike: cool white walls, navy trim and grey planks. */
